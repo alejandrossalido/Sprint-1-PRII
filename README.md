@@ -25,6 +25,12 @@ El launch inicia `turtlesim` y el nodo de dibujo en un único comando:
 ros2 launch g17_prii3_turtlesim draw_17.launch.py
 ```
 
+No ejecutes previamente `ros2 run turtlesim turtlesim_node` ni lances este
+archivo en otra terminal. Dos instancias publican simultáneamente en
+`/turtle1/pose`, lo que impide al controlador seguir una sola tortuga. Antes
+de iniciar, `ros2 node list` no debe mostrar `/draw_17` ni `/turtlesim`.
+Finaliza la ejecución con `Ctrl+C` antes de volver a lanzarla.
+
 ## Servicios
 
 En otra terminal, carga el mismo workspace antes de llamar a los servicios:
