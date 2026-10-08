@@ -3,7 +3,9 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
+    """Inicia turtlesim y el nodo que dibuja el 17."""
 
+    # Arranca el simulador junto al controlador del grupo.
     return LaunchDescription([
 
         Node(

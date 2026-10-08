@@ -15,19 +15,16 @@ class Draw17(Node):
     """Controla la tortuga y expone servicios para pausar y reiniciar."""
 
     def __init__(self):
-        """Inicializa las comunicaciones ROS y la secuencia de dibujo."""
+        """Configura las comunicaciones y el control del dibujo."""
         super().__init__('draw_17')
 
-        # Publisher:
-        # Envía velocidades a turtle1
+        # Comunicaciones ROS 2
         self.cmd_vel_pub = self.create_publisher(
             Twist,
             '/turtle1/cmd_vel',
             10
         )
 
-        # Subscriber:
-        # Recibe la posición actual de turtle1
         self.pose_sub = self.create_subscription(
             Pose,
             '/turtle1/pose',
@@ -35,19 +32,18 @@ class Draw17(Node):
             10
         )
 
-        # Cliente del servicio set_pen
-        # Nos permite levantar y bajar el lápiz
+        # Clientes de los servicios de turtlesim
         self.pen_client = self.create_client(
             SetPen,
             '/turtle1/set_pen'
         )
 
-        # Cliente para borrar el dibujo y devolver turtlesim a su estado inicial.
         self.reset_client = self.create_client(
             Empty,
             '/reset'
         )
 
+        # Espera a que turtlesim esté listo para recibir peticiones.
         while not self.pen_client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info(
                 'Esperando al servicio /turtle1/set_pen...'
@@ -56,39 +52,29 @@ class Draw17(Node):
         while not self.reset_client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('Esperando al servicio /reset...')
 
-        # Aquí guardaremos la posición actual de la tortuga
+        # Estado y secuencia del dibujo
         self.pose = None
-
-        # Lista de acciones para dibujar "17"
         self.actions = [
-            ('pen', False),       # Levantar lápiz
-            ('move', 3.0, 8.0),  # Ir al inicio del 1
-
-            ('pen', True),        # Bajar lápiz
-            ('move', 3.0, 3.0),  # Dibujar el 1
-
-            ('pen', False),       # Levantar lápiz
-            ('move', 5.0, 8.0),  # Ir al inicio del 7
-
-            ('pen', True),        # Bajar lápiz
-            ('move', 8.0, 8.0),  # Parte superior del 7
-            ('move', 5.5, 3.0),  # Diagonal del 7
-
-            ('pen', False),       # Levantar lápiz al terminar
+            # 'pen' cambia el trazo y 'move' define un destino (x, y).
+            ('pen', False),
+            ('move', 3.0, 8.0),
+            ('pen', True),
+            ('move', 3.0, 3.0),
+            ('pen', False),
+            ('move', 5.0, 8.0),
+            ('pen', True),
+            ('move', 8.0, 8.0),
+            ('move', 5.5, 3.0),
+            ('pen', False),
         ]
 
-        # Acción que estamos ejecutando
+        # Índice, peticiones asíncronas y pausa actual.
         self.current_action = 0
-
-        # Sirve para saber si estamos esperando
-        # a que termine una llamada a set_pen
         self.pen_future = None
         self.reset_future = None
-
-        # El servicio de pausa no pierde la acción que se estaba ejecutando.
         self.paused = False
 
-        # Servicios públicos del nodo.
+        # Servicios de control del dibujo
         self.stop_service = self.create_service(
             Trigger,
             '/stop_drawing',
@@ -105,7 +91,7 @@ class Draw17(Node):
             self.restart_drawing_callback
         )
 
-        # El controlador se ejecutará 10 veces por segundo
+        # Ejecuta el control a 10 Hz.
         self.timer = self.create_timer(
             0.1,
             self.control_loop
@@ -120,17 +106,11 @@ class Draw17(Node):
     def set_pen(self, enabled):
         """Activa o desactiva el lápiz de turtle1."""
         request = SetPen.Request()
-
-        # Color del trazo
         request.r = 0
         request.g = 0
         request.b = 255
-
-        # Grosor
         request.width = 5
-
-        # off = 0 -> dibuja
-        # off = 1 -> no dibuja
+        # En SetPen, off=1 levanta el lápiz y off=0 dibuja.
         request.off = 0 if enabled else 1
 
         self.pen_future = self.pen_client.call_async(request)
@@ -194,48 +174,36 @@ class Draw17(Node):
         return response
 
     def move_to(self, target_x, target_y):
-        """
-        Mueve la tortuga hacia una posición objetivo.
-
-        Devuelve True cuando hemos llegado.
-        """
-        # Distancia entre la tortuga y el objetivo
+        """Mueve la tortuga al destino y devuelve True al llegar."""
+        # Calcula el error de posición y orientación.
         distance = math.sqrt(
             (target_x - self.pose.x) ** 2 +
             (target_y - self.pose.y) ** 2
         )
 
-        # Ángulo que debería tener la tortuga
         target_angle = math.atan2(
             target_y - self.pose.y,
             target_x - self.pose.x
         )
 
-        # Diferencia entre dónde mira y dónde debería mirar
         angle_error = target_angle - self.pose.theta
-
-        # Normalizar el ángulo entre -pi y pi
         angle_error = math.atan2(
             math.sin(angle_error),
             math.cos(angle_error)
         )
 
-        # Si estamos suficientemente cerca,
-        # consideramos que hemos llegado
+        # Da por alcanzado el punto dentro del margen establecido.
         if distance < 0.1:
             self.stop_turtle()
             return True
 
         msg = Twist()
 
-        # Si todavía estamos mirando muy lejos
-        # de la dirección correcta, giramos primero
+        # Gira primero si el error angular es grande; si no, avanza y corrige.
         if abs(angle_error) > 0.15:
             msg.linear.x = 0.0
             msg.angular.z = 2.0 * angle_error
 
-        # Cuando ya miramos hacia el objetivo,
-        # avanzamos mientras corregimos ligeramente
         else:
             msg.linear.x = min(1.5, 1.5 * distance)
             msg.angular.z = 2.0 * angle_error
@@ -245,18 +213,12 @@ class Draw17(Node):
         return False
 
     def control_loop(self):
-        """
-        Este es el cerebro principal del programa.
-
-        Se ejecuta cada 0.1 segundos y decide
-        qué tiene que hacer la tortuga.
-        """
-        # Todavía no conocemos la posición
+        """Actualiza el dibujo en cada ciclo del temporizador."""
+        # No controla el movimiento hasta recibir la primera pose.
         if self.pose is None:
             return
 
-        # Durante el reinicio no debe enviarse ningún movimiento. Esperamos a
-        # que turtlesim haya borrado el lienzo y repuesto la pose inicial.
+        # Espera a que el servicio de reinicio termine antes de continuar.
         if self.reset_future is not None:
             self.stop_turtle()
 
@@ -277,19 +239,16 @@ class Draw17(Node):
 
             return
 
-        # Detener no reinicia la secuencia: simplemente deja de publicar
-        # velocidades hasta recibir /continue_drawing.
+        # La pausa conserva la acción actual para poder reanudarla.
         if self.paused:
             self.stop_turtle()
             return
 
-        # Hemos terminado todas las acciones
         if self.current_action >= len(self.actions):
             self.stop_turtle()
             return
 
-        # Si hemos llamado a set_pen,
-        # esperamos a que termine el servicio
+        # Espera la respuesta del último cambio de lápiz.
         if self.pen_future is not None:
 
             self.stop_turtle()
@@ -302,10 +261,7 @@ class Draw17(Node):
 
         action = self.actions[self.current_action]
 
-        # ------------------------------
-        # ACCIÓN: cambiar estado del lápiz
-        # ------------------------------
-
+        # Ejecuta la acción actual: cambiar el lápiz o moverse al destino.
         if action[0] == 'pen':
 
             enabled = action[1]
@@ -316,10 +272,6 @@ class Draw17(Node):
                 self.get_logger().info('Levantando lápiz')
 
             self.set_pen(enabled)
-
-        # ------------------------------
-        # ACCIÓN: moverse a un punto
-        # ------------------------------
 
         elif action[0] == 'move':
 
@@ -341,26 +293,19 @@ class Draw17(Node):
 
 def main(args=None):
     """Inicializa y ejecuta el nodo de dibujo."""
-    # Inicializar ROS 2
+    # Inicio y ciclo de vida del nodo ROS 2.
     rclpy.init(args=args)
-
-    # Crear nuestro nodo
     node = Draw17()
 
     try:
-        # Mantener el nodo ejecutándose
         rclpy.spin(node)
 
     except KeyboardInterrupt:
         pass
 
-    # Detener la tortuga antes de cerrar
+    # Cierre controlado.
     node.stop_turtle()
-
-    # Destruir el nodo
     node.destroy_node()
-
-    # Cerrar ROS 2
     rclpy.shutdown()
 
 
