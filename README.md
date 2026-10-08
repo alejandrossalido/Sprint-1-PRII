@@ -4,6 +4,39 @@ En este proyecto usamos ROS 2 y turtlesim para que una tortuga dibuje el número
 
 Dejamos dos formas de compilarlo y ejecutarlo: en Ubuntu directamente y con Distrobox, que es como lo tengo preparado en mi ordenador.
 
+## Descargar el proyecto de GitHub en tu ordenador
+
+Para hacer una copia del repositorio necesitas tener Git instalado. Puedes comprobarlo con:
+
+    git --version
+
+Si no lo tienes, en Ubuntu puedes instalarlo con:
+
+    sudo apt update
+    sudo apt install git
+
+Abre una terminal y ejecuta estos comandos. En este ejemplo guardamos el proyecto en la carpeta Projects de tu usuario:
+
+    mkdir -p ~/Projects
+    cd ~/Projects
+    git clone https://github.com/alejandrossalido/Sprint-1-PRII.git
+    cd Sprint-1-PRII
+
+mkdir crea la carpeta si todavía no existe, cd entra en ella y git clone descarga el código y su historial desde GitHub. El símbolo ~ significa tu carpeta personal. Si prefieres guardar el proyecto en otro sitio, ve a esa carpeta antes de usar git clone.
+
+La copia descargada se llama Sprint-1-PRII y contiene directamente src, el README y el archivo .gitignore. Esa carpeta es el workspace: hace la misma función que g17_PRII3_ws en mi copia original. No hace falta crear otra carpeta g17_PRII3_ws dentro.
+
+Clonar descarga el proyecto, pero también necesitas tener ROS y las herramientas del apartado que corresponda. Las carpetas build, install y log se crean al compilar en tu ordenador.
+
+Si usas Distrobox en Omarchy, puedes descargarlo desde la terminal normal antes de entrar en la caja, guardándolo dentro de tu carpeta de usuario.
+
+Si ya tienes la copia y quieres descargar los últimos cambios, entra en su carpeta y ejecuta:
+
+    cd ~/Projects/Sprint-1-PRII
+    git pull --ff-only
+
+Después vuelve a compilar si los cambios lo requieren.
+
 ## 1. Compilar y ejecutar en Ubuntu
 
 Necesitas tener:
@@ -20,7 +53,11 @@ Una vez instalado ROS y configurados sus repositorios, instala estas herramienta
     sudo apt update
     sudo apt install python3-colcon-common-extensions ros-humble-turtlesim
 
-Abre una terminal dentro de la carpeta g17_PRII3_ws. Es la que contiene src y este README, dentro de Sprint1. Ejecuta los comandos en este orden:
+Abre una terminal dentro de la carpeta del workspace, donde están src y este README. Si has seguido los pasos de descarga, entra con:
+
+    cd ~/Projects/Sprint-1-PRII
+
+En mi copia original esa carpeta se llama g17_PRII3_ws y está dentro de Sprint1. Ejecuta los comandos en este orden:
 
     source /opt/ros/humble/setup.bash
     colcon build --symlink-install --packages-select g17_prii3_turtlesim
@@ -47,7 +84,11 @@ Desde una terminal normal del ordenador, entra en la caja:
 
 Uso --clean-path para que se utilice el Python de Ubuntu dentro de la caja y no otro que tenga instalado en Omarchy. Si tu caja tiene otro nombre, cambia ros-humble por ese nombre.
 
-Cuando ya estés dentro, ve a la carpeta del proyecto. Esta es la ruta de mi ordenador; en otro ordenador tendrás que poner la tuya:
+Cuando ya estés dentro, ve a la carpeta del proyecto. Si lo has descargado siguiendo los pasos anteriores:
+
+    cd ~/Projects/Sprint-1-PRII
+
+Si estás usando mi copia original, la ruta es esta. Usa solo el comando cd que corresponda a tu copia:
 
     cd "/home/alejandrossalido/Projects/01_Universidad/3º_de_Carrera/Proyecto_RII_3/Sprint1/g17_PRII3_ws"
 
@@ -66,11 +107,13 @@ Deja abierta la terminal donde has lanzado el proyecto y abre una segunda. Si us
 
     distrobox enter --clean-path --name ros-humble
 
-En Ubuntu directamente puedes saltarte ese paso. En los dos casos, entra en la carpeta del proyecto y carga el entorno. Esta es la ruta de mi ordenador; cámbiala si tienes el proyecto en otra carpeta:
+En Ubuntu directamente puedes saltarte ese paso. En los dos casos, entra en la misma carpeta desde la que arrancaste el proyecto y carga el entorno. Para la copia descargada de GitHub:
 
-    cd "/home/alejandrossalido/Projects/01_Universidad/3º_de_Carrera/Proyecto_RII_3/Sprint1/g17_PRII3_ws"
+    cd ~/Projects/Sprint-1-PRII
     source /opt/ros/humble/setup.bash
     source install/setup.bash
+
+Si usas mi copia original, cambia la línea cd por la ruta de g17_PRII3_ws que aparece en el apartado de Distrobox.
 
 Ahora puedes usar los tres comandos siguientes, uno cada vez, desde esta segunda terminal.
 
