@@ -1,12 +1,10 @@
 # Sprint 1 PRII3 - Grupo 17
 
-En este proyecto usamos ROS 2 y turtlesim para que una tortuga dibuje el número 17. Hemos hecho un nodo en Python que controla el movimiento y tres servicios para pausar, continuar y reiniciar el dibujo.
+Usamos ROS 2 y turtlesim para dibujar el número 17. El dibujo se puede parar, reanudar y reiniciar.
 
-Dejamos dos formas de compilarlo y ejecutarlo: en Ubuntu directamente y con Distrobox, que es como lo tengo preparado en mi ordenador.
+## Descargar el proyecto
 
-## Descargar el proyecto de GitHub en tu ordenador
-
-Para hacer una copia del repositorio necesitas tener Git instalado. Puedes comprobarlo con:
+Comprueba que tienes Git:
 
     git --version
 
@@ -15,80 +13,63 @@ Si no lo tienes, en Ubuntu puedes instalarlo con:
     sudo apt update
     sudo apt install git
 
-Abre una terminal y ejecuta estos comandos. En este ejemplo guardamos el proyecto en la carpeta Projects de tu usuario:
+Para descargarlo en tu carpeta Projects:
 
     mkdir -p ~/Projects
     cd ~/Projects
     git clone https://github.com/alejandrossalido/Sprint-1-PRII.git
     cd Sprint-1-PRII
 
-mkdir crea la carpeta si todavía no existe, cd entra en ella y git clone descarga el código y su historial desde GitHub. El símbolo ~ significa tu carpeta personal. Si prefieres guardar el proyecto en otro sitio, ve a esa carpeta antes de usar git clone.
+Sprint-1-PRII es el workspace y ya contiene src y este README. En mi copia original se llama g17_PRII3_ws. Si usas Distrobox, puedes descargarlo antes de entrar en la caja.
 
-La copia descargada se llama Sprint-1-PRII y contiene directamente src, el README y el archivo .gitignore. Esa carpeta es el workspace: hace la misma función que g17_PRII3_ws en mi copia original. No hace falta crear otra carpeta g17_PRII3_ws dentro.
-
-Clonar descarga el proyecto, pero también necesitas tener ROS y las herramientas del apartado que corresponda. Las carpetas build, install y log se crean al compilar en tu ordenador.
-
-Si usas Distrobox en Omarchy, puedes descargarlo desde la terminal normal antes de entrar en la caja, guardándolo dentro de tu carpeta de usuario.
-
-Si ya tienes la copia y quieres descargar los últimos cambios, entra en su carpeta y ejecuta:
+Para actualizar una copia que ya tienes:
 
     cd ~/Projects/Sprint-1-PRII
     git pull --ff-only
-
-Después vuelve a compilar si los cambios lo requieren.
 
 ## 1. Compilar y ejecutar en Ubuntu
 
 Necesitas tener:
 
-- Ubuntu 22.04 con escritorio, para poder ver la ventana de turtlesim.
-- ROS 2 Humble instalado. La opción Desktop incluye las herramientas habituales.
-- Python 3, que ya viene con Ubuntu.
-- colcon para compilar el paquete y turtlesim para el simulador.
+- Ubuntu 22.04 con escritorio.
+- ROS 2 Humble y Python 3.
+- colcon y turtlesim.
 
-Si todavía no tienes ROS 2, puedes seguir la [guía de instalación de Humble en Ubuntu](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html).
+Para instalar ROS, sigue la [guía de Humble en Ubuntu](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html).
 
-Una vez instalado ROS y configurados sus repositorios, instala estas herramientas si te faltan. Esto solo hace falta hacerlo una vez:
+Con ROS instalado y sus repositorios configurados, instala las herramientas que falten:
 
     sudo apt update
     sudo apt install python3-colcon-common-extensions ros-humble-turtlesim
 
-Abre una terminal dentro de la carpeta del workspace, donde están src y este README. Si has seguido los pasos de descarga, entra con:
+Entra en la carpeta descargada:
 
     cd ~/Projects/Sprint-1-PRII
 
-En mi copia original esa carpeta se llama g17_PRII3_ws y está dentro de Sprint1. Ejecuta los comandos en este orden:
+Compila y arranca el proyecto:
 
     source /opt/ros/humble/setup.bash
     colcon build --symlink-install --packages-select g17_prii3_turtlesim
     source install/setup.bash
     ros2 launch g17_prii3_turtlesim draw_17.launch.py
 
-El primer comando carga ROS, el segundo compila y el tercero hace que ROS encuentre nuestro paquete. El último abre turtlesim y arranca el nodo que dibuja el 17.
+El launch abre el simulador y nuestro nodo juntos.
 
 ## 2. Compilar y ejecutar con Distrobox en Omarchy
 
-En mi ordenador uso Omarchy. Para trabajar con ROS tengo una caja de Distrobox llamada ros-humble, con Ubuntu 22.04 y ROS 2 Humble instalados dentro.
+En mi ordenador uso Omarchy con Distrobox y una caja llamada ros-humble. Necesitas Distrobox con Docker o Podman, y la caja con Ubuntu 22.04 y las herramientas del apartado anterior instaladas.
 
-Para hacerlo de esta forma necesitas:
-
-- Distrobox instalado en el ordenador, junto con Docker o Podman.
-- Una caja con Ubuntu 22.04, ROS 2 Humble, Python 3, colcon y turtlesim.
-- La carpeta del proyecto accesible desde la caja. En mi instalación está dentro de mi carpeta de usuario y se comparte con Distrobox.
-
-Los siguientes pasos parten de que la caja ya está preparada. Si la acabas de crear, instala ROS dentro siguiendo la guía del apartado de Ubuntu y después instala colcon y turtlesim con los comandos de ese mismo apartado.
-
-Desde una terminal normal del ordenador, entra en la caja:
+Desde la terminal normal, entra en la caja:
 
     distrobox enter --clean-path --name ros-humble
 
-Uso --clean-path para que se utilice el Python de Ubuntu dentro de la caja y no otro que tenga instalado en Omarchy. Si tu caja tiene otro nombre, cambia ros-humble por ese nombre.
+--clean-path hace que use el Python de la caja. Cambia ros-humble si tu caja tiene otro nombre.
 
-Cuando ya estés dentro, ve a la carpeta del proyecto. Si lo has descargado siguiendo los pasos anteriores:
+Dentro de la caja, entra en la copia descargada:
 
     cd ~/Projects/Sprint-1-PRII
 
-Si estás usando mi copia original, la ruta es esta. Usa solo el comando cd que corresponda a tu copia:
+O en mi copia original. Usa solo uno de los dos comandos cd:
 
     cd "/home/alejandrossalido/Projects/01_Universidad/3º_de_Carrera/Proyecto_RII_3/Sprint1/g17_PRII3_ws"
 
@@ -99,63 +80,51 @@ Después compila y arranca el proyecto:
     source install/setup.bash
     ros2 launch g17_prii3_turtlesim draw_17.launch.py
 
-Aunque el ordenador use Omarchy, estos comandos se ejecutan dentro del Ubuntu de Distrobox. La ventana de la tortuga aparece en el escritorio del ordenador.
-
 ## Pausar, continuar y reiniciar el dibujo
 
-Deja abierta la terminal donde has lanzado el proyecto y abre una segunda. Si usas Distrobox, entra también en la caja desde esa nueva terminal:
+Deja el proyecto abierto y abre otra terminal. Si usas Distrobox, entra también en la caja:
 
     distrobox enter --clean-path --name ros-humble
 
-En Ubuntu directamente puedes saltarte ese paso. En los dos casos, entra en la misma carpeta desde la que arrancaste el proyecto y carga el entorno. Para la copia descargada de GitHub:
+En Ubuntu directamente, sáltate ese paso. Entra en la carpeta del proyecto y carga el entorno:
 
     cd ~/Projects/Sprint-1-PRII
     source /opt/ros/humble/setup.bash
     source install/setup.bash
 
-Si usas mi copia original, cambia la línea cd por la ruta de g17_PRII3_ws que aparece en el apartado de Distrobox.
+Si usas mi copia original, cambia el cd por la ruta del apartado de Distrobox. Ejecuta cada servicio por separado.
 
-Ahora puedes usar los tres comandos siguientes, uno cada vez, desde esta segunda terminal.
-
-Para parar la tortuga mientras está dibujando:
+Parar:
 
     ros2 service call /stop_drawing std_srvs/srv/Trigger "{}"
 
-La tortuga se queda quieta y conserva el punto del dibujo. La respuesta debe mostrar success=True y el mensaje "Dibujo pausado".
-
-Para continuar desde donde se quedó:
+Reanudar desde donde se quedó:
 
     ros2 service call /continue_drawing std_srvs/srv/Trigger "{}"
 
-La tortuga vuelve a moverse y sigue el dibujo. La respuesta debe mostrar success=True y "Dibujo reanudado".
-
-Para borrar el dibujo y empezar otra vez:
+Borrar y empezar de nuevo:
 
     ros2 service call /restart_drawing std_srvs/srv/Trigger "{}"
 
-Se borra el lienzo, la tortuga vuelve a la posición inicial y empieza de nuevo. La respuesta debe mostrar success=True y "Reinicio solicitado".
-
-Para enseñarlo en clase, pausa mientras se está moviendo, comprueba que se queda quieta, reanúdala y después reiníciala. Si el dibujo ya terminó, primero usa restart_drawing: continue_drawing solo sirve para continuar un dibujo que todavía no ha acabado.
-
-Para cerrar el proyecto, pulsa Ctrl+C en la primera terminal. El servicio stop_drawing solo pausa la tortuga; mantiene el programa abierto para poder reanudarla.
+La respuesta debe mostrar success=True. Si el dibujo ya terminó, usa restart_drawing. Para cerrar el programa, pulsa Ctrl+C en la primera terminal.
 
 ## Qué archivos usamos
 
-Dentro de src/g17_prii3_turtlesim están los archivos principales:
+Dentro de src/g17_prii3_turtlesim:
 
-- g17_prii3_turtlesim/draw_17.py: controla el movimiento, el lápiz y los servicios del dibujo.
-- launch/draw_17.launch.py: arranca el simulador y nuestro nodo juntos.
-- setup.py y setup.cfg: indican cómo instalar el paquete y ejecutar el nodo.
-- package.xml: contiene la información del paquete y sus dependencias.
+- g17_prii3_turtlesim/draw_17.py: movimiento, lápiz y servicios.
+- launch/draw_17.launch.py: arranca el simulador y el nodo.
+- setup.py y setup.cfg: instalación del paquete.
+- package.xml: información y dependencias.
 
 ## Comprobaciones rápidas
 
-Desde la segunda terminal, con el entorno ya cargado, puedes ver los nodos, los topics y los servicios:
+Desde la segunda terminal, con el entorno cargado:
 
     ros2 node list
     ros2 topic list
     ros2 service list
 
-Deberían aparecer los nodos /draw_17 y /turtlesim. Nuestro nodo envía las velocidades por /turtle1/cmd_vel y recibe la posición de la tortuga por /turtle1/pose.
+Deberían aparecer /draw_17 y /turtlesim. Las velocidades se envían por /turtle1/cmd_vel y la posición se recibe por /turtle1/pose.
 
-No hace falta abrir turtlesim por separado, porque el launch ya lo inicia. En las siguientes ejecuciones puedes saltarte colcon build si no has cambiado el código, pero sí debes volver a cargar el entorno en cada terminal nueva.
+Si no has cambiado el código, puedes saltarte colcon build. Los comandos source se repiten en cada terminal nueva.
