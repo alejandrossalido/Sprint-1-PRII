@@ -1,4 +1,4 @@
-# Proyecto PRII3 - Grupo 17
+# Sprint 1 PRII3 - Grupo 17
 
 En este proyecto usamos ROS 2 y turtlesim para que una tortuga dibuje el número 17. Hemos hecho un nodo en Python que controla el movimiento y tres servicios para pausar, continuar y reiniciar el dibujo.
 
